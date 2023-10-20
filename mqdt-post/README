@@ -1,0 +1,55 @@
+1: calculate mqdt equation with  DIS.v0  (for bound)/ Au4.v0 (for continuum) at server.
+   These two programs' input out are modified to be very similar to each other, so that I
+   can modify them for different energy region calculations. And I will read mqdt.in (bound) 
+   or acmqdt(continuum) as input for my later postprocess control keys.
+2: transfer the result :
+        tau.out
+        Anorm.out
+        Ara.out
+        Dn.out 
+        mqdt.in (acmqdt.in for continuum) 
+        [miuang.out 
+         dalfa.in 
+              are also need (I know it's not mandatory, 
+              I will modify this later), so I can construct 
+              dfde internally in my postprocess code.]
+
+   to your linux  computer. You can do it faster by zipping the files then scp to your computer:
+       in the server    : 
+          zip result.zip tau.out Anorm.out Ara.out Dn.out mqdt.in miuang.out dalfa.in
+       on your computer : 
+          scp -P 2500 guchun@202.120.60.30:YOUR_MQDT_RESULT_DIR/result.zip YOUR_POST_PROCESS_DIR/.
+       then unzip       :
+          unzip result.zip
+
+3 run post process program (including constructing dfde, reassigning color and 
+  search energy levels) on you linux computer. 
+  For bound energy run:
+      ./postmqdt-autoplot-ogpf.exe -dis -path YOUR_POST_PROCESS_DIR/
+  for continuum energy run (NOTE: it is not correctly working right now):
+      ./postmqdt-autoplot-ogpf.exe -au -path YOUR_POST_PROCESS_DIR/
+
+  use can simply run 
+      ./postmqdt-autoplot-ogpf.exe
+  or ./postmqdt-autoplot-ogpf.exe --help
+  or ./postmqdt-autoplot-ogpf.exe --h
+  to have a look at the command line helper.
+
+  If you also provide experimental energy levels in
+     elev.exp
+  We can compare the theory levels with them.
+
+  Output files
+     phystable.out        : all energy levels
+     theo-exp-compare.out : compare theory with corresponding experiment levels
+     generated gnuplot input file :
+     exp-plot.out tau2-plot.out theo-plot.out [dfde2-plot.out (if you provide dalfa.in)]
+
+4 plot JHANGZ with gnuplot on you linux computer:
+
+  cd YOUR_POST_PROCESS_DIR/
+  gnuplot plot6ch-draw.gnu
+
+  !!! Note, I put NaN to prevent gnuplot to plot void data and break unnecessary connections.
+  !!! But it seems so system or gnuplot version is not friendly with NaN.
+  !!! Any way, the figures here are not so important, they are just for auxilary check purpose.

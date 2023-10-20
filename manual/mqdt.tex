@@ -1,0 +1,318 @@
+\documentclass[11pt]{article}
+\usepackage{amsmath, amssymb, graphicx, subfigure}
+\usepackage[numbers]{natbib}
+\usepackage{listings}
+
+\usepackage{graphicx}% Include figure files
+\usepackage{dcolumn}% Align table columns on decimal point
+\usepackage{bm}% bold math
+\usepackage[
+left=0.7in,right=0.7in,top=0.8in,bottom=0.9in
+]{geometry}
+\tolerance=5000
+\hyphenpenalty=1000
+\usepackage{latexsym}
+\usepackage{epsfig}
+\usepackage{array}
+\usepackage{setspace}
+\usepackage{lineno}
+\usepackage{xcolor}
+\usepackage[colorlinks,linkcolor=blue,anchorcolor=blue,urlcolor  = blue,citecolor=blue]{hyperref}
+\usepackage{ulem}
+\usepackage{txfonts}
+\usepackage[section]{placeins}
+\newcommand*\funit{ph/\ensuremath{\mu}m\ensuremath{^2}}
+\newcommand*\fluenceone[1]{10\ensuremath{^{#1}}~\funit}
+\newcommand*\fluence[2]{#1\ensuremath{\times}10\ensuremath{^{#2}}~\funit}
+
+\newcommand*\iunit{W/cm\ensuremath{^2}}
+\newcommand*\intensityone[1]{10\ensuremath{^{#1}}~\iunit}
+\newcommand*\intensity[2]{#1\ensuremath{\times}10\ensuremath{^{#2}}~\iunit}
+
+\newcommand*{\addheight}[2][.5ex]{%
+	\raisebox{0pt}[\dimexpr\height+(#1)\relax]{#2}%
+}
+
+\newlength{\figurewidth}
+\setlength{\figurewidth}{0.85\textwidth}
+
+\usepackage{amsmath, amssymb, graphicx, subfigure}
+\usepackage[numbers]{natbib}
+
+\textwidth = 6.5 in
+\textheight = 9.6 in
+\oddsidemargin = 0.0 in
+\evensidemargin = 0.0 in
+\topmargin = 0.0 in
+\headheight = 0.0 in
+\headsep = -0.3 in
+\parskip = 0.2in
+\parindent = 0.0in
+
+\renewcommand{\labelenumi}{(\roman{enumi})}
+
+\newcommand{\ket}[1]{\ensuremath{\vert#1\rangle}}
+\newcommand{\bra}[1]{\ensuremath{\langle#1\vert}}
+\newcommand{\braket}[2]{\ensuremath{\langle#1\vert#2\rangle}}
+\newcommand{\braketoperator}[3]{\ensuremath{\left\langle#1\left\lvert#2\right\rvert#3\right\rangle}}
+\newcommand{\reducedmatrix}[3]{\ensuremath{\left\langle#1\left\lVert#2\right\rVert#3\right\rangle}}
+\newcommand{\pd}[2]{\ensuremath{\frac{\partial#1}{\partial#2}}}
+\newcommand{\degree}{\ensuremath{^\circ}}
+\newcommand{\config}[3]{1s$^{#1}$2s$^{#2}$2p$^{#3}$}
+
+\setlength{\figurewidth}{0.9\textwidth}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{mystyle}{
+	backgroundcolor=\color{backcolour},   
+	commentstyle=\color{codegreen},
+	keywordstyle=\color{magenta},
+	numberstyle=\tiny\color{codegray},
+	stringstyle=\color{codepurple},
+	basicstyle=\ttfamily\footnotesize,
+	breakatwhitespace=false,         
+	breaklines=true,                 
+	captionpos=b,                    
+	keepspaces=true,                 
+	numbers=left,                    
+	numbersep=5pt,                  
+	showspaces=false,                
+	showstringspaces=false,
+	showtabs=false,                  
+	tabsize=2
+}
+
+\lstset{style=mystyle}
+
+
+
+
+\begin{document}
+
+\title{Manual for MQDT solver}
+
+\author{Rui Jin%$^{1}$
+	\\
+	\\
+	%$^1$Center for Free-Electron Laser Science, DESY, Hamburg, Germany
+}
+
+\normalem
+\date{\today}
+                     
+\maketitle
+
+\section{\label{sec:theory}Theory background}
+
+The energy eigen wave function for a atomic excited complex should be a superposition of the eigenchannel wavefunctions, 
+\begin{align}
+\label{eq:wf-mix}
+\Psi^{J^{\pi}}=\sum_{\alpha}^{N_p}A_\alpha\psi_\alpha^{J\pi}(E),
+\end{align}
+where $N_p$ is the number of physical channels. 
+
+The asymptotic boundary condition (for bound and continuum) leads to a set of secular equations, 
+\begin{align}
+\label{eq:asymp}
+\begin{cases}
+{\displaystyle \sum_{\alpha}U_{i\alpha}\sin\pi(\nu_i+\mu_\alpha)A_\alpha^\rho=0} & \mathrm{for}\ i\in \mathrm{closed\ channels,}\\
+{\displaystyle \sum_{\alpha}U_{i\alpha}\sin\pi(-\tau^\rho+\mu_\alpha)A_\alpha^\rho=0 } &  \mathrm{for}\ i\in \mathrm{open\ channels.}
+\end{cases}
+\end{align}
+The existence of non-trivial solution $A_\alpha^\rho$ in eqns.~(\ref{eq:asymp}) requires the determinant of coefficients matrix to vanish, which gives rise to the multichannel quantum defect theory (MQDT) eqns.~(\ref{eq:mqdt}): 
+\begin{subequations}
+	\begin{align}
+	\label{eq:mqdt}
+	F({x_i},{U_{i\alpha},\mu_\alpha})=\det[U_{i\alpha}\sin\pi(x_i+\mu_\alpha)]=0,
+	\end{align}
+	where,
+	\begin{align}
+	x_i =
+	\begin{cases}
+	{\displaystyle \nu_i} & \mathrm{for}\ i\in \mathrm{closed\ channels,}\\
+	{\displaystyle -\tau } &  \mathrm{for}\ i\in \mathrm{open\ channels,}
+	\end{cases} \notag
+	\end{align}
+    and the effective principle quantum number are defined by,
+	\begin{align}
+	E=I_i-q^2/\nu^{2}_i.
+	\end{align}
+\end{subequations}
+
+We can employ the graphic solution method to solve the MQDT equation in autoionization region naturally. However, it's beneficial to also treat the bound energy region in the similar fashion(i.e., Lu-Fano plot) by the fact that the phase shift can be smoothly connected with the quantum defect number by the analytical continuation property of S matrix.
+
+There are situations where we need to treat several channels, that corresponds to more than one thresholds, as openned ones (denote as $\{\text{I}_{o}\}$).  However, due to the limitation of 2D illustration of the Lu-Fano type plot, only one energy relation condition line can be presented to find the physical discrete levels.  In such situations, we need to project these channels onto one of these thresholds (e.g. an arbitrary one $\mathrm{I}_y\in\{\text{I}_{o}\}$), via the following additional constrains, 
+
+\begin{subequations}
+\label{eq:constrain}
+\begin{eqnarray}
+-\tau_i = 
+\begin{cases}
+{\displaystyle -\tau_i} & i = y,\\
+{\displaystyle -\tau_{y} + \Delta_{i,y}}&  i\neq y,
+\end{cases}
+\end{eqnarray}
+where,
+\begin{eqnarray}
+\Delta_{i,y} = \nu_{i}-\nu_{y}=\left[\frac{1}{\nu^2_{x}}-\frac{I_i-I_{x}}{q^2}\right]^{-1/2}- \left[\frac{1}{\nu^2_{x}}-\frac{I_y-I_{x}}{q^2}\right]^{-1/2}.
+\end{eqnarray}
+\end{subequations}
+As we can see constrains~(\ref{eq:constrain}) varies smoothly and fulfills the Rydberg energy relation at the physical discrete levels.
+
+The mixing coefficients can be easily shown to be proportional to the cofactor $C_{i\alpha}$ of $F({x_i},{U_{i\alpha},\mu_\alpha})$ by the analogy of the secular eqns~(\ref{eq:asymp}) and the definition of determinant.  
+\begin{eqnarray}
+A_\alpha=C_{i\alpha}/(\sum_{\alpha}C_{i\alpha}^2)^{1/2},\quad \forall i \leq N_p
+\end{eqnarray}
+
+%Oscillator strength (density) 
+
+\section{\label{sec:program}Program structure} 
+
+\begin{lstlisting}[language=python]
+ constants     # global constants and parameters
+ type_def      # user defined complex data structure for easier data communication
+ numerical     # frequently used numerical algorithms
+ darray        # dynamical array for easier data storage
+ file_cmdl_io  # file i/o and commandline parser
+ stdio         # frequently used string operations and block output.
+ envset        # seting up machine-dependent systematic parameters (EPS, PI, Nan ...)
+ gengrid       # generating X and Y grids.
+ SOLVMQDT      # solving the MQDT equations
+\end{lstlisting}
+
+\if 0
+\begin{figure}[b]
+	\includegraphics[width=\figurewidth]{{program-scheme}.png} 
+	\caption{\label{fig:program-schem}Schematic diagram of program structure.}
+\end{figure}
+\fi
+\section{\label{sec:numerical}Numerical algorithms}
+\begin{enumerate}
+\item X-grid
+\begin{itemize}
+	\item uniform 
+	\item divide X-axis into several segments based on the eigenchannel quantum defect $\mu_{\alpha}\pm \delta_{\alpha}/2$.
+	\item $\delta_{\alpha}$ is the resonance width estimated by the imaginary part of projected $K_{cc}$ matrix. ( J. M. Lecomte, J. Phys. B: At. Mol. Phys. 20 (1987) 3645-3662.) 
+	\item (Optional) manually set x-segments and increase grid density.  
+	\item (Not useful) alternatively, divide X-axis into several segments based on effective eigenchannel quantum defect  $\tilde{\mu}_{\alpha} \pm \delta_{\alpha}/2$. Where the effective eigenchannel quantum defect  $\tilde{\mu}_{\alpha}$ is obtained by diagonalizing the real part of projected $K_{cc}$ matrix.( J. M. Lecomte, J. Phys. B: At. Mol. Phys. 20 (1987) 3645-3662.). But it seems working poorly in the test.
+\end{itemize}
+\item Y-grid 
+\begin{itemize}
+	\item For the first x step $\nu_{x}^{(0)}$, initiate the Y-grid segments with $\mu_{\alpha}$($\alpha \in \text{open channels}$). Use rather dense y grid to search.
+	\item Second x step $\nu_{x}^{(1)}$: update Y-grid segments with the results first step. Only a few grid per segment is needed from now on.
+	\item $n>2$ x step: update Y-grid segments with the extrapolation of the result of $n-1'th$ and $n-2'th$ x step.
+	\item Be careful with sudden jump due to modulo 1.
+	\item (Optional)manually set y-segments and increase grid density.
+\end{itemize}
+\item equation solver
+\begin{itemize}
+	\item Newton-Ralphson.
+	\item bisect search.
+	\item hybrid of Newton and bisect updating formula.
+	\item Can define a relaxation coefficient to slow down the oscillation.
+\end{itemize}
+\end{enumerate}
+\section{\label{sec:input}Program input}
+Required input files:
+\begin{lstlisting}[language=bash]
+miuang.out     # S matrix prepared by smooth-toolkits
+mqdt.in        # MQDT solver control file                             
+\end{lstlisting}
+
+The major control file \emph{mqdt.in}. The input file is \textcolor{red}{case-insensitive}. You can add  \textcolor{red}{blank lines and $\#$ to comment. You can also use $\{\}$ to wrap the data block, you can put them in one line or break the wrapper into multiple lines}.
+
+\begin{table}[]
+	\caption{Options in \emph{mqdt.in}}
+	\label{table:mqdt.in}
+	\begin{tabular}{|p{5cm}|p{10.5cm}|}
+		\hline
+		\verb|Z| & target charge \\
+		\verb|nchan|& number of physical channels (\textcolor{red}{optional}, program will determine it from S-matrix input file) \\
+		\verb|nop|& number of open channels (\textcolor{red}{optional}, program will determine it from the energy region and the choice of x-axis threshold \verb|IPx|. )\\
+		\verb|nip|& number of ionization potentials (IP), (\textcolor{red}{optional}, program will determine from the IP array block \verb|IP = {....} |).\\
+		\verb|IP_unit|& \textcolor{red}{optional} unit for IP, cm-1, ryd, au, a.u., ev, Hartree are accepted (case-insensitive). It will be treated as \textcolor{red}{cm-1} if not specified\\
+		\verb|IP|& IP array block \verb|IP = {....}|, the \verb|{}| wrapper accept \verb|,| and space to divide strings. \\
+		\verb|IP_seq|& indices to assign IP to each physical channel.\\
+		
+		\verb|IPy|& threshold to present effective quantum defect/phase-shift. channels associated to threshold $IP \leq IP_y$ will be treated \textcolor{red}{opened}. You \textcolor{red}{must} specify it for \textcolor{red}{bound-state} calculation. It will be determined internally in \textcolor{red}{continuum} calculation.\\
+		\verb|IPx|& threshold to present energy. channels associated to threshold $IP \geq IP_x$ will be treated \textcolor{red}{closed}. You \textcolor{red}{must} specify it for \textcolor{red}{bound-state} calculation. It will be determined internally in \textcolor{red}{continuum} calculation.\\
+		
+		\verb|xrange|& \textcolor{red}{optional} $\nu_x$ with respect to $IP_x$. You must either specify \verb|xrange| or \verb|E_continuum|.\\
+		\verb|E_continuum|&\textcolor{red}{optional} continuum electron energy with respect to the first IP $I_1$. You can specify unit for the energy range string e.g. \verb|E_continuum = {0.0:0.20_ryd}|. Accepted energy units are IP, cm-1, ryd, au, a.u., ev, Hartree (case-insensitive). The unit is \textcolor{red}{cm-1} by default.\\
+		\verb|x_grid_type|& Options: mu-eigen / mu-proj / uniform\\
+		\verb|y_grid_type|& Options: adaptive / uniform\\
+		\verb|nx_flat|& number of grid per X-grid segment for the flat region.\\
+		\verb|nx_spike|& number of grid per X-grid segment for the sharp peaks.\\
+		\verb|ny_init_guess|& number of grid per Y-grid segment in the initiative guess algorithm\\
+		\verb|ny_adapt|& number of grid per Y-grid segment in the adaptive algorithm\\
+		\verb|x_fine|& \textcolor{red}{optional}. Manually refine the X-grid. You can specify several sections by \verb|{}| wrapper. For example \verb|x_fine = {2.19:2.21%1000, 2.29:2.31%1000}|, where \verb|%1000| means you want to use 1000 times finer grid for this section.\\
+		\verb|y_fine|& \textcolor{red}{optional}. Manually refine the Y-grid. Usage the same as \verb|x_fine|.\\
+		\verb|eqnsolv_method|& How to solve the MQDT equation. Options are: hyb, bisect, newton.\\
+		\verb|relax|& \textcolor{red}{optional}. Relaxation coefficient to prevent oscillation. Default 1.0. \\
+		\verb|dmu|& \textcolor{red}{optional}. Constant correction to $\mu_{\alpha}$. Specify it with \verb|{}| wrapper: \verb|dmu = {0.0 0.0 0.0 0.0 0.0 0.0}| \\
+		\verb|au_peak_search_method|& \textcolor{red}{For postmqdt}. Either search the steepest change of each collisional-channel phase shift or the total   phase shift. Options: tot / chan. \\
+		\verb|k_mat_cofact|& the column index for cofactor when solving the A-coefficients from the secular equations (asymptotic boundary condition).
+		$\forall i \leq nchan$ will work, this is only left for debugging purpose. \\
+		\verb|twoJ|& \textcolor{red}{Not used currently}. $2j$ of the system, used to calculate Lande-g factor.\\
+		\hline
+	\end{tabular}
+\end{table}
+Below is a sample input file.
+\newpage
+
+\lstinputlisting[language=python]{mqdt.in}
+
+The \emph{command line} to employ the code:
+\begin{lstlisting}[language=bash]
+# to list helper information
+mqdt.exe --help 
+# to specify working directory 
+mqdt.exe -p GIVE_IT_A_DIRECTORY
+# otherwise it will look for input file in Present_Working_Directory by default
+mqdt.exe
+# to specify debug output
+# this will print all debug information
+mqdt.exe -debug all
+# this will print F matrix, interpolation
+mqdt.exe -debug Fmat+interp
+# run mqdt.exe --help will list all debug options
+\end{lstlisting}
+
+\section{\label{sec:output}Program output}
+The output file \emph{debug-mqdt.out} contains the calculation parameter summation 
+\lstinputlisting[language=python]{debug-mqdt.out}
+
+The file \emph{tau.out} contains the calculated effective quantum defects/phase shifts.
+One can run the following gnuplot script to plot it:
+\lstinputlisting[language=python]{draw.gnu}
+\begin{figure}[b]
+	\includegraphics[width=\figurewidth]{{Oxygen-au}.png} 
+	\caption{\label{fig:example}Solution of Oxygen $J^{\pi} = 1^-$ with 6 physical channels in autoionization region.}
+\end{figure}
+
+Other important output files are: 
+\begin{lstlisting}[language=bash]
+Anorm.out     # Normalized A-coefficients
+Ara.out       # Unnormalized A-coefficients                
+Dn.out        # Normalization factor N for A-coefficients.
+[NormDos.out] # Density of States if discrete calculation
+[xgrid.out]   # xgrid information, if -debug grid is on 
+[ygrid.out]   # ygrid information, if -debug grid is on                  
+\end{lstlisting}
+Similarly, the results for discrete energy region is shown in Fig.~\ref{fig:dis}:
+\begin{figure}[b]
+	\includegraphics[width=\figurewidth]{{jhangz-dis}.png} 
+	\caption{\label{fig:dis}Solution of Oxygen $J^{\pi} = 1^-$ with 6 physical channels in discrete region.}
+\end{figure}
+\normalem
+%\nocite{*}
+\bibliography{mqdt}
+
+\end{document}
+%
+% ****** End of file apssamp.tex ******
+

@@ -1,0 +1,30 @@
+# feel free to add comments and blank lines.
+z = 1
+k_mat_cofact = 1 
+#x_grid_type = uniform
+x_grid_type = mu-eigen  # mu-proj works poorly currently
+nx_flat = 100
+nx_spike = 100
+#y_grid_type = uniform
+y_grid_type = adaptive # first guess from mu, then from previous solution.
+ny_init_guess = 1000
+ny_adapt = 20
+
+twoj = 5
+IP_unit = cm-1
+IP = { 109837.02, 
+       136647.57, 
+       136667.59, 
+       150305.03,
+       150307.02 } # {} wraps the data block, you can put them in one line or multiple lines.
+IP_seq = {1 1 1 3 4 5}           
+#E_continuum = {109837.03:110837.02_cm-1}
+E_continuum = {0.0:0.11_ryd}
+dmu = {0.0 0.0 0.0 0.0 0.0 0.0}
+x_fine = {2.248:2.257%3000, 2.355:2.363%3000}
+#y_fine = {0.025:0.03%5}
+#eqnsolv_method = newton
+eqnsolv_method = hyb
+#eqnsolv_method = bisect
+relax = 0.9
+au_peak_search_method = tot # chan --> for overlap resonance, but may provide fake root.
