@@ -211,9 +211,10 @@ A_\alpha=C_{i\alpha}/(\sum_{\alpha}C_{i\alpha}^2)^{1/2},\quad \forall i \leq N_p
 \item equation solver
 \begin{itemize}
 	\item Newton-Ralphson.
-	\item bisect search.
-	\item hybrid of Newton and bisect updating formula.
-	\item Can define a relaxation coefficient to slow down the oscillation.
+	\item Bisect search.
+	\item Hybrid of Newton and bisect updating formula.
+	\item A relaxation coefficient can be used to slow down the oscillation.
+	\item For autoionization(continuum ) region, Greene's generalized eigenvalue technique is now implemented too improve efficiency. Caveate could be that now I am using Lapack routine, so only double precision is possible, which only allows for not so high dimension problems (where the efficiency of the original root finding version is tolerable).
 \end{itemize}
 \end{enumerate}
 \section{\label{sec:input}Program input}
@@ -221,6 +222,7 @@ Required input files:
 \begin{lstlisting}[language=bash]
 miuang.out     # S matrix prepared by smooth-toolkits
 mqdt.in        # MQDT solver control file                             
+dalfa.in       # dipole matrix elements (optional) 
 \end{lstlisting}
 
 The major control file \emph{mqdt.in}. The input file is \textcolor{red}{case-insensitive}. You can add  \textcolor{red}{blank lines and $\#$ to comment. You can also use $\{\}$ to wrap the data block, you can put them in one line or break the wrapper into multiple lines}.
