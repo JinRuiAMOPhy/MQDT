@@ -5,6 +5,7 @@ The mqdt-genEigen is a test version that utilizes the geneal eigenvalue solver f
 [However, the implementation now relies on the lapack package, which is only limited to double precission, the eigen-wavefunction mixing coefficients can be problematic.]
 ## Install
 make
+
 make -f Makefile-ifort
 
 before running the make, you make need to modify the Makefile a bit. 
@@ -14,7 +15,8 @@ An example of Rydberg states of neutral atomic oxygen is presented in the exampl
 1) /YourCodeDirectory/mqdt/mqdt.exe 
 2) /YourCodeDirectory/mqdt-post/postmqdt.exe 
 3) To have a look at the results.
+
    python plot.py
    
-   which renders result.pdf
+   This renders result.pdf
 
