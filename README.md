@@ -13,5 +13,8 @@ before running the make, you make need to modify the Makefile a bit.
 An example of Rydberg states of neutral atomic oxygen is presented in the example directory.
 1) /YourCodeDirectory/mqdt/mqdt.exe 
 2) /YourCodeDirectory/mqdt-post/postmqdt.exe 
-3) python plot.py to have a look at the results.
+3) To have a look at the results.
+   python plot.py
+   
+   which renders result.pdf
 
