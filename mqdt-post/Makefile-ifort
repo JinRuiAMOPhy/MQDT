@@ -44,8 +44,8 @@ CFLAGS = # -J$(OBJS_DIR) $(IDIR)
 LAPACK =  -L${MKLROOT}/lib/intel64 -llapack -lm  # -lpthread -lm -ldl
 LLAPACK =  -i8 # -qmkl=sequential
 
-LFLAGS = -g -check all -warn all -stand -lpthread -shared-intel -mcmodel=medium  # -heap-arrays 0 -V -p
-LIBS =
+LFLAGS = -g -check all -warn all -stand -lpthread -shared-intel -mcmodel=medium   -heap-arrays #0 # -V -p
+LIBS = -g
 
 VPATH = $(SRC_DIR_f90d1):$(OBJS_DIR)
 OBJS = $(addprefix $(OBJS_DIR), $(OBJS_f90d1))
@@ -99,6 +99,8 @@ search_root.o: \
    darray.o \
    interpolate.o \
    stdio.o
+interpolate.o: \
+	interpolate.f90 constants.o
 dfde.o: \
    dfde.f90 \
    numerical.o \

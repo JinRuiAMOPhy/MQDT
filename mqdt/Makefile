@@ -39,7 +39,7 @@ CFLAGS = -O3 -g -fall-intrinsics -fbacktrace -Wall -fcheck=all -std=f2008  -J$(O
 LAPACK = -llapack -lblas
 LLAPACK = -L/usr/lib/ 
 #CFLAGS = -g -fall-intrinsics -fbacktrace  -J$(OBJS_DIR) $(IDIR)
-LFLAGS = # -L/home/ruijin/simulations/gcc-12.2.0/obj/x86_64-pc-linux-gnu/libgfortran/
+LFLAGS =  # -L/home/ruijin/simulations/gcc-12.2.0/obj/x86_64-pc-linux-gnu/libgfortran/
 LIBS = 
 
 VPATH = $(SRC_DIR_f90d1):$(OBJS_DIR)

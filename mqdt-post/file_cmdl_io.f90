@@ -478,6 +478,29 @@ contains
       return 
    end subroutine determin_nop
 
+   subroutine manual_openchan(T, G)
+      implicit none
+      type(mqdt), intent(inout) :: T
+      type(grid), intent(inout) :: G
+      integer :: j, count
+      if(G%E_cont_i> G%E_cont_f) stop 'exit program: Ei > Ef'
+      count = 0
+      do j = 1, T%nchan
+         if(isin_intvect(j,T%iop_man)) then
+            count = count + 1
+            call Add_int_ToList(T%iopen, j)
+         else
+            call Add_int_ToList(T%iclose, j)
+         end if
+      end do 
+      if(count /= T%nop) then
+         write(stderr, *) 'exit program: '&
+         &'nop does not match number of elements of iop_man'
+         stop
+      end if
+      T%nclose = T%nchan - T%nop
+      return 
+   end subroutine manual_openchan 
    subroutine read_mqdt_input_key(FN, CTR, T, S, G, keys, args)
       implicit none
       type(fname), intent(in) :: FN
@@ -580,6 +603,16 @@ contains
             end if
             allocate(T%IP_seq(T%nchan))
             read(vals(i), *)(T%IP_seq(j), j = 1, T%nchan)
+         !2024.10.10 Rui manul iop 
+         else if(keys(i) == 'iop_man') then
+            ncol = from_line_get_ncol(vals(i))
+            if(ncol > T%nchan .and. T%nchan /= 0) then
+               write(*,*)'only the first', T%nchan ,'will be used'
+            !   T%nchan = ncol
+            end if
+            allocate(T%iop_man(ncol))
+            read(vals(i), *)(T%iop_man(j), j = 1, ncol)
+         !2024.10.10 Rui manul iop 
          else if(keys(i) == 'nx_flat') then
             read(vals(i), *) G%nx_flat
          else if(keys(i) == 'nx_spike') then
@@ -750,7 +783,9 @@ contains
       S%nchan = T%nchan
       T%n_ang = (T%nchan - 1) * T%nchan / 2 
       S%n_ang = T%n_ang
-      if(.not.check_item_in_list(keys, 'nop')) then
+      if (check_item_in_list(keys, 'nop') .and. check_item_in_list(keys, 'iop_man')) then
+         call manual_openchan(T,G)
+      else if(.not.check_item_in_list(keys, 'nop')) then
          call determin_nop(T, G)
          if(T%nop <= 0) then
             write(STDERR,*)&
@@ -758,7 +793,8 @@ contains
               &wrong Erange/xrange input '//trim(FN%f_in_mqdt)
             stop 
          end if
-      else 
+      else if(check_item_in_list(keys, 'nop') .and. &
+             (.not. check_item_in_list(keys, 'iop_man'))) then
          j = T%nop
          call determin_nop(T, G)
          if(T%nop /= j) then
@@ -1070,6 +1106,7 @@ contains
       end if
       call cpu_time(finish)
       if(T%nop < T%nchan) then
+        write(stderr, *) 'b4 sort_mqdt'
         call sort_mqdt(T, CTR, FN)
         write(*,"('sorted: inserted ', i3, ' NaNs to seperate &
            &unwanted connections, taking',E20.10, ' sec')")&

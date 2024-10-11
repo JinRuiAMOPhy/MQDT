@@ -39,6 +39,11 @@ program SOLVMQDT
    call cpu_time(start)
    call environmentset() ! setting nan et. al.
    call initiate(FN, T, S, CTR, G)
+   call cpu_time(finish)
+   write(stdout, "('Initializing took',e20.10,' sec.')") finish - start
+   write(funit_dbg, "('#------------------')")
+   write(funit_dbg, "('#Initializing took ',A,' sec.')") trim(float2str(finish - start, '(f9.3)'))
+   start = finish
    if(T%nop == T%nchan) then
     write(funit_dbg, "('#------------------')")
     write(funit_dbg, "('# nop == nchan, no need to project')")
@@ -66,6 +71,7 @@ contains
       type(control), intent(in) :: CTR
       integer :: istep, nrt, i
       character(len = short_str) :: fmtstr
+      real(long) :: nux, Eabs
       fmtstr = '(2E25.15)'
 
       open(FN%funit_tau, file = FN%f_tau, action = 'write') 
@@ -79,19 +85,22 @@ contains
       ! if provided.
       ! As an initiative guess for the adaptive y grid segments.
       loop_x: do istep = 1, S%n_es 
-        write(FN%funit_tau, fmtstr, advance = 'no') S%es(istep)
+        print *, 'istep = ', istep, 'es = ', S%es(istep)
+        nux = from_E_cm_get_nu(T, convert_energy_to_cm(S%es(istep), 'Ryd'), T%IPx)
+        Eabs = get_E_ryd(T, nux)
+        write(FN%funit_tau, fmtstr, advance = 'no') nux, Eabs
         call print_vector(S%mu_s(istep,:), T%nop, T%nop, fmtstr, FN%funit_tau)
-        write(FN%funit_Ara, fmtstr, advance = 'no') S%es(istep)
+        write(FN%funit_Ara, fmtstr, advance = 'no') nux, Eabs
         T%Ara(:,:) = ZERO; T%Anorm(:,:) = ZERO; T%Dn = ONE; T%Norm_dos = ONE
         do i = 1, T%nchan
           T%Ara(i,i) = ONE; T%Anorm(i,i) = ONE
         end do 
         call print_matrix_as_vect_by_col(T%Ara, T%nchan, T%nop, T%nchan,&
              fmtstr, FN%funit_Ara)
-        write(FN%funit_Anorm, fmtstr, advance = 'no') S%es(istep)
+        write(FN%funit_Anorm, fmtstr, advance = 'no') nux, Eabs
         call print_matrix_as_vect_by_col(T%Anorm, T%nchan, T%nop, T%nchan,&
              fmtstr, FN%funit_Anorm)
-        write(FN%funit_Dn, fmtstr, advance = 'no') S%es(istep)
+        write(FN%funit_Dn, fmtstr, advance = 'no') nux, Eabs
         call print_vector(T%Dn, T%nop, T%nop, fmtstr, FN%funit_Dn)
         if(CTR%yes_dis) then
            write(FN%funit_normdos, fmtstr, advance = 'no') S%es(istep)
@@ -141,6 +150,7 @@ contains
       ! then adopt previous solution as better guess.
       ! reallocate the y grid segment and redefine grid 
       ! number per segment
+      !return 
       call y_init(T, S, G, CTR, 'reinitiate')
 
       T%tx(2) = T%nux
@@ -249,7 +259,6 @@ contains
             call print_vector(T%Angle, T%n_ang, T%n_ang, fmtstr, FN%funit_para_use, 'yes')
          end if
       end do loop_x
-
       close(FN%funit_tau); close(FN%funit_Ara); close(FN%funit_Dn)
       close(FN%funit_Anorm)
       if(CTR%yes_dis) close(FN%funit_normdos)
@@ -280,7 +289,6 @@ contains
       ! As an initiative guess for the adaptive y grid segments.
       call x_init(T, S, G, CTR) 
       call y_init(T, S, G, CTR, 'uniform') 
-
       loop_x: do istep = 1, G%nstep_x - 1
          ! interpolated S matrix are in T data structure.
          if(G%dx(istep) <= ZERO) cycle ! to avoid the repeated grid/segments adaptive grid scheme
@@ -353,7 +361,18 @@ contains
       do istep = 2, size(G%dy) 
          if(G%dy(istep) <= ZERO) cycle ! to avoid the repeated grid/segments adaptive grid scheme
          call prepare_Fmat(nux, nuy, T, CTR)
-         !if(CTR%dbg_eqnsolv)print *, nuy, T%detF
+         if(CTR%dbg_eqnsolv)then
+                 print *, 'discrete ', CTR%yes_dis
+                 print "('Tnux',E12.5)", T%nux
+                 print "('istep',i5,' dy ', E12.5, ' y ', E12.5, ' |F| ', E12.5)", &
+                 istep,  G%dy(istep), nuy, T%detF
+                 print "('Fmat')"
+                 call print_matrix_as_vect_by_row(T%F, T%nchan, T%nchan, T%nchan,'(E14.5)', stdout)
+                 print "('Mu')"
+                 call print_vector(T%mu, T%nchan, T%nchan,'(E14.5)', stdout)
+                 print "('Angle')"
+                 call print_vector(T%Angle, T%n_ang, T%n_ang,'(E14.5)', stdout)
+         end if
          if(T%detF * detF <= ZERO) then
             nrt = nrt + 1
             cross(nrt, 1) = ytmp
@@ -425,6 +444,14 @@ contains
             call SOLU(T, CTR, irt)
          end if
       end do 
+      if(CTR%dbg_solu) then
+         print *,'Miu'
+         call print_vector(T%tau(:), T%nop, print_col_s_fmt, '(E30.20)', STDOUT)
+         do irt = 1, T%nop
+         print *,'A(',trim(int2str(irt,'(i8)')),')'
+         call print_vector(T%Ara(:, irt), T%nchan, print_col_s_fmt, '(E13.5)', STDOUT) 
+         end do 
+      end if
       if(CTR%dbg_eqnsolv) then
          write(funit_dbg, "('# eigenchannel mu:')")
          call print_vector(T%mu, T%nchan, print_col_s_fmt, '(f9.4)', funit_dbg)

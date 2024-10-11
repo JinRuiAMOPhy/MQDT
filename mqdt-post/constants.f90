@@ -7,7 +7,7 @@ module constants
   implicit none
   ! for precision : double precision
   !integer, parameter :: long = selected_real_kind(15)
-  integer, parameter :: long = selected_real_kind(26)
+  integer, parameter :: long = selected_real_kind(26) !26
   integer, parameter :: sp = kind( 1.0 )
   integer, parameter :: dp = kind( 1.0d0 )
   !integer, parameter :: wp = dp

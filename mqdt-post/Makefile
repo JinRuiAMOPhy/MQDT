@@ -41,7 +41,7 @@ LD = gfortran
 IDIR = 
 CFLAGS = -g -fall-intrinsics -fbacktrace -Wall -fcheck=all -std=f2008  -J$(OBJS_DIR) $(IDIR)
 #CFLAGS = -g -fbacktrace -Wall -fcheck=all -J$(OBJS_DIR) $(IDIR)
-LFLAGS = 
+LFLAGS = -g
 LIBS = 
 
 VPATH = $(SRC_DIR_f90d1):$(OBJS_DIR)

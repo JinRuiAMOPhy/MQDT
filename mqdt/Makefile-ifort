@@ -33,7 +33,7 @@ EXE = mqdt.exe
 FC = ifort #gfortran
 LD = ifort #gfortran
 IDIR = 
-CFLAGS =  -J$(OBJS_DIR) $(IDIR) -g -traceback -check all -warn interface -O0 -mcmodel=medium -heap-arrays 
+CFLAGS =  -J$(OBJS_DIR) $(IDIR)  -O3 -mcmodel=medium -heap-arrays  -qopt-matmul -O3 #-parallel -guide-par  #-g -traceback -check all -warn interface
 # for mac osx
 #LAPACK =  -L${MKLROOT}/lib -lpthread -lm -ldl
 #LLAPACK = -lmkl_intel_lp64 -lpthread  -i8  -mkl=sequential
@@ -41,7 +41,7 @@ CFLAGS =  -J$(OBJS_DIR) $(IDIR) -g -traceback -check all -warn interface -O0 -mc
 LAPACK =  -L${MKLROOT}/lib/intel64 -llapack -lm # -lpthread -lm -ldl
 LLAPACK =  -i8 # -qmkl=sequential
 
-LFLAGS = -g -traceback -check all -warn interface -O0 -mcmodel=medium -heap-arrays #–check bounds
+LFLAGS =  -O3 -mcmodel=medium -heap-arrays -qopt-matmul -O3 #-parallel -guide-par#–check bounds -g -traceback -check all -warn interface
 LIBS = 
 
 VPATH = $(SRC_DIR_f90d1):$(OBJS_DIR)

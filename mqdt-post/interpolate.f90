@@ -119,7 +119,10 @@ function Spline_create( x, y, yp1, ypn ) result (S)
   ! solve the tridiagonal matrix of a, b, c for r
   !
   bet = b(1)
-  if ( b(1) == ZERO ) stop "TRD_solve: rewrite equations"
+  if ( b(1) == ZERO ) then
+    print *, x
+    stop "TRD_solve: rewrite equations"
+  end if
   S%y2(1) = r(1) / bet
   do j = 2, n           ! decomposition and forward substitution
     temp(j) = c(j-1) / bet

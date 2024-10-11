@@ -317,15 +317,15 @@ contains
          return
       else if(x < Xs(1)) then
          !if(ibug) write(STDERR, fmtstrWarn1) x, Xs(1)
-         !if(ibug) write(funit_dbg, fmtstrWarn1) x, Xs(1)
-         write(STDERR, fmtstrWarn1) x, Xs(1)
-         write(funit_dbg, fmtstrWarn1) x, Xs(1)
+         if(ibug) write(funit_dbg, fmtstrWarn1) x, Xs(1)
+         !write(STDERR, fmtstrWarn1) x, Xs(1)
+         !write(funit_dbg, fmtstrWarn1) x, Xs(1)
          isampl = 2
       else if(x > Xs(ns)) then
          !if(ibug) write(STDERR, fmtstrWarn2) x, ns, Xs(ns)
-         !if(ibug) write(funit_dbg, fmtstrWarn2) x, ns, Xs(ns)
-         write(STDERR, fmtstrWarn2) x, ns, Xs(ns)
-         write(funit_dbg, fmtstrWarn2) x, ns, Xs(ns)
+         if(ibug) write(funit_dbg, fmtstrWarn2) x, ns, Xs(ns)
+         !write(STDERR, fmtstrWarn2) x, ns, Xs(ns)
+         !write(funit_dbg, fmtstrWarn2) x, ns, Xs(ns)
          isampl = ns
       else 
          do i = 2, ns
@@ -920,4 +920,26 @@ contains
       end do 
       return 
    end subroutine Kmat
+   function is_at_edge(y) result(res)
+      implicit none
+      real(long), intent(in) ::  y
+      integer :: res
+      res = -2
+      if(abs(y-ONE) < 1.e-3_long) res = 1
+      if(abs(y-ZERO) < 1.e-3_long) res = 0
+   end function is_at_edge
+   function isin_intvect(x, v) result(res)
+      implicit none
+      integer, intent(in) :: x
+      integer, dimension(:), intent(in) :: v
+      integer :: i
+      logical :: res
+      res = .False.
+      do i = 1, size(v)
+         if(x == v(i)) then
+            res = .True.
+            exit
+         end if
+      end do
+   end function isin_intvect
 end module numerical

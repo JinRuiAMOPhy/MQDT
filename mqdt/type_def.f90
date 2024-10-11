@@ -8,7 +8,7 @@ module type_def
       integer :: n_IP
       real(long), allocatable :: IPs(:)
       character(short_str) :: IPunit
-      integer, allocatable :: ip_seq(:), iopen(:), iclose(:)
+      integer, allocatable :: ip_seq(:), iopen(:), iclose(:), iop_man(:)
       integer :: twoJ
       integer :: ipy, ipx ! previously ip1, ip2 remember we use higher ip to define x
       integer :: ip3

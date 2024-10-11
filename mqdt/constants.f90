@@ -8,7 +8,8 @@ module constants
   ! for precision : double precision
   !integer, parameter :: long = selected_real_kind(15)
   !integer, parameter :: long = kind(1.q0)
-  integer, parameter :: long = selected_real_kind(24)
+  !integer, parameter :: long = kind(1.d0) ! seems unrobust
+  integer, parameter :: long = selected_real_kind(16) !, 307) ! for high dimension
   integer, parameter :: sp = kind( 1.0 )
   integer, parameter :: dp = kind( 1.0d0 )
   !integer, parameter :: wp = dp

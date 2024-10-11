@@ -29,6 +29,7 @@ contains
       end if
       call get_exp_data(FN,T,spec, phys, CTR)
       call print_phys_tab(FN, CTR, T, phys, spec)
+      print *, 'find_lev done'
    end subroutine findlev
 
    subroutine resonance_width(T, S, wi)
@@ -513,15 +514,20 @@ contains
       end do 
       print "(2i5,3F8.4)", x_l, x_r, T%nux_sort(x_l), nux, T%nux_sort(x_r)
       print '("E",F8.3, "eV")', get_E_ryd(T, nux) * 13.6058
-      if(x_l == x_r) then
+      if(abs(x_l - x_r) < EPS) then
          tau_res = T%tau2(x_l,ich_eig)
-      else
+      else if (x_l < x_r) then
+! rui 
+         print *, "Resonance:", x_l, x_r
+! rui 
          SF = Spline_create(T%nux_sort(x_l:x_r), T%tau2(x_l:x_r, ich_eig))
          if(ibug)write(funit_dbg, "(i8,' well behaved sorted openchan tau sample&
             & points from', i8, ' to', i8)") x_r -x_l, x_l, x_r
          if(ibug)write(funit_dbg, "(2E20.10)")&
              (T%nux_sort(ie), T%tau2(ie, ich_eig), ie = x_l, x_r)
          tau_res = Spline_interpolate(SF, nux)
+      else if (x_l >= x_r) then
+         write(STDERR, "(A,i4,i4)") 'x_l>x_r', x_l, x_r
       end if
    end function get_resonance_tau2
 
@@ -566,9 +572,13 @@ contains
       y_l = Func(i_m)
       y_r = Func(i_m+1)
       !SPOT = Spline_create(x, Func)
+! rui 
+      print * , 'finer_cross 1'
+! rui 
       SPOT = Spline_create(x, f1_smooth)
       do 
          x_m = (x_l + x_r) / TWO
+         print * , 'finer_cross x_m', x_m
          y_m = Spline_interpolate(SPOT, x_m) &
                - (principal_n - get_nuy(T, x_m))
          if(abs(y_m) <= 1.e-10_long)  return
@@ -714,6 +724,9 @@ contains
       y_l = y(i_cross)
       y_r = y(i_cross+1)
       f_smooth(:) = smooth_Func(y(i_cross-nw:i_cross+nw))
+! rui 
+      print * , 'finer_bisect_root_dtdE', x_m
+! rui 
       SPOT = Spline_create(x(i_cross-nw:i_cross+nw), f_smooth)!y(i_cross-nw:i_cross+nw))
       do 
          x_m = (x_l + x_r) / TWO
@@ -945,7 +958,10 @@ contains
                write(funit_dbg,'(2E20.10)') nu(rt_mrks(irt)+1),slope(rt_mrks(irt)+1)
                write(funit_dbg,'(2E20.10)') nu(rt_mrks(irt)+2),slope(rt_mrks(irt)+2)
             end if
+! rui
+            print *, 'search_tot_tau_steep x_l', x_l
             SFp = Spline_create(nu(x_l:x_r), slope(x_l:x_r))
+! rui 
             call finer_bisect_root_dtdE(nu, slope2, 5, rt_mrks(irt), nux)
             call AddToList(phys%lev_nux, nux)
             ich_eig = which_eigenchan2(T, rt_mrks(irt))
@@ -1023,8 +1039,12 @@ contains
                   write(funit_dbg,'(i8, 2E20.10)') nu(rt_mrks(irt)+1),slope(rt_mrks(irt)+1)
                   write(funit_dbg,'(i8, 2E20.10)') nu(rt_mrks(irt)+2),slope(rt_mrks(irt)+2)
                end if
+! rui 
+               print *, 'search_eigen_tau_steep 1'
                SF = Spline_create(nu(x_l:x_r), tau(x_l:x_r))
+               print *, 'search_eigen_tau_steep 2'
                SFp = Spline_create(nu(x_l:x_r), slope(x_l:x_r))
+! rui 
                call finer_bisect_root_dtdE(nu, slope2, 5, rt_mrks(irt), nux)
                write(funit_dbg,'(i3,"th resonance x", f8.4, " dtau/dE(i) ", E20.10 )') irt,&
                      nux, slope(rt_mrks(irt))

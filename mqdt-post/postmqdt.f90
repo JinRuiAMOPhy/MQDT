@@ -16,8 +16,8 @@ program main
    type(spectrodata) :: spec
    call environmentset()
    call initiate(FN, T, S, CTR, G)
-   !if(T%nop< T%nchan) then
+   if(T%nop< T%nchan) then
      call findlev(FN, T, CTR, S, phys, spec)
-   !end if
+   end if
    call finalize(T, S, phys, spec)
 end program

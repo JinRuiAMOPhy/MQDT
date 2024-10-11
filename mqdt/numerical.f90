@@ -106,7 +106,7 @@ contains
 
    function convert_energy_to_cm(Ein, Eunit) result(E_cm) 
       implicit none
-      character(len = short_str), intent(in) :: Eunit
+      character(len = *), intent(in) :: Eunit
       real(long), intent(in) :: Ein
       real(long) :: E_cm
       E_cm = Ein
@@ -233,6 +233,7 @@ contains
       real(long), intent(in) :: nuy
       real(long) :: tau
       tau = mod(-nuy, ONE)
+      !tau = nuy
       if(tau < ZERO) then
          tau = tau + ONE
       end if
@@ -694,7 +695,10 @@ contains
       integer :: i, j
       real(long), dimension(T%nchan) :: dnu
       do i = 1, T%nchan
-         if(T%IP_seq(i) < T%IPx) then
+         !2024..10.10 Rui for the case all channels are associated to ipx
+         !if(T%IP_seq(i) < T%IPx) then
+         if(T%IP_seq(i) <= T%IPx) then
+         !2024..10.10 Rui for the case all channels are associated to ipx
             dnu(i)=nuy + from_nux_get_nu(T, nux, T%IP_seq(i)) &
                    - from_nux_get_nu(T, nux, T%IPy)
          else
@@ -1406,4 +1410,18 @@ contains
       if(abs(y-ONE) < 1.e-3_long) res = 1
       if(abs(y-ZERO) < 1.e-3_long) res = 0
    end function is_at_edge
+   function isin_intvect(x, v) result(res)
+      implicit none
+      integer, intent(in) :: x
+      integer, dimension(:), intent(in) :: v
+      integer :: i
+      logical :: res
+      res = .False.
+      do i = 1, size(v)
+         if(x == v(i)) then
+            res = .True.
+            exit
+         end if
+      end do
+   end function isin_intvect
 end module numerical

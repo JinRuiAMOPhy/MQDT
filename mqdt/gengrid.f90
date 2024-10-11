@@ -125,9 +125,9 @@ contains
       i = T%nop + 2
       if(index(todo, "guess") /= 0) then
          do i2 = 1, G%n_y_fine 
-            G%yseg(i) = from_nuy_get_tau(G%ydiv1(i2))
+            G%yseg(i) = from_nuy_get_tau(ONE-G%ydiv1(i2))
             i = i + 1
-            G%yseg(i) = from_nuy_get_tau(G%ydiv2(i2))
+            G%yseg(i) = from_nuy_get_tau(ONE-G%ydiv2(i2))
             i = i + 1
          end do 
          i = 1 + T%nop + G%n_y_fine * 2 + 1
@@ -142,8 +142,8 @@ contains
             touched = .false.
             b = G%yseg(i)
             do i2 = 1, G%n_y_fine
-               a = from_nuy_get_tau(G%ydiv2(i2))
-               c = from_nuy_get_tau(G%ydiv1(i2))
+               a = from_nuy_get_tau(ONE-G%ydiv2(i2))
+               c = from_nuy_get_tau(ONE-G%ydiv1(i2))
                if(is_ascend(a, b, c)) then
                   G%n_step_seg_y(i) = n_grid_seg * G%nydiv(i2)
                   touched = .true.
@@ -165,7 +165,7 @@ contains
         write(funit_dbg, "('# reconstructing y grid segments &
            &based on solutions : (',i5, 'segments ) ')") G%n_seg_y
       end if
-      call print_vector_comment(G%yseg(:), G%n_seg_y, 15, '(f10.5)', funit_dbg)
+      call print_vector_comment(ONE-G%yseg(:), G%n_seg_y, 15, '(f10.5)', funit_dbg)
       call print_int_vector_comment(G%n_step_seg_y(:), &
          G%n_seg_y, 15, '(i10)', funit_dbg)
       write(funit_dbg, "('# The number of y steps', i6,'(&

@@ -178,9 +178,10 @@ contains
       if(CTR%dbg_sort) then
          write(funit_dbg,'(9i8)')(iop, iop =1, T%nop)
          do ich = 1, T%nchan
-            write(funit_dbg,'(i4,9f8.4)')ich, (T%Anorm(ie, ich, iop), iop = 1, T%nop)
+            write(funit_dbg,'("#",i4)') ich
+            write(funit_dbg,'(9f8.4)') (T%Anorm(ie, ich, iop), iop = 1, T%nop)
          end do 
-         write(funit_dbg,'(4x, 9i8)')(MAXNCH(iop), iop = 1, T%nop)
+         write(funit_dbg,'(9i8)')(MAXNCH(iop), iop = 1, T%nop)
          write(funit_dbg,'(9L8)')visited(:)
       end if
    end subroutine sort_tau_os

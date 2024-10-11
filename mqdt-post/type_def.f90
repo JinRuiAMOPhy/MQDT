@@ -10,7 +10,7 @@ module type_def
       integer :: twoJ
       integer :: ipy, ipx ! previously ip1, ip2 remember we use higher ip to define x
       integer :: k_mat_cofact
-      integer, allocatable :: ip_seq(:), iopen(:), iclose(:)
+      integer, allocatable :: ip_seq(:), iopen(:), iclose(:), iop_man(:)
       character(len = short_str) :: IPunit
       real(long) :: Z
       ! nux previously nu2  
